@@ -3,6 +3,7 @@ set(HEADERS
 
 set(SOURCES
         library.cpp
+        GelfAppender.cpp
         )
 
 foreach(SRC ${HEADERS})

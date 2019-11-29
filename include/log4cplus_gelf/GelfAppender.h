@@ -4,6 +4,7 @@
 #include <log4cplus/appender.h>
 
 #include <string>
+#include <unordered_map>
 
 namespace log4cplus {
 
@@ -24,8 +25,17 @@ public:
 protected:
     void append(const log4cplus::spi::InternalLoggingEvent &event) override;
 
+    std::string createGelfJsonFromEvent(const log4cplus::spi::InternalLoggingEvent &event);
+    void sendGelfPayload(const std::string& payload);
+
 private:
+    std::string mServerHost;
+    unsigned int mServerPort;
+    std::string mHost;
     std::string mFacility;
+
+    bool mIncludeLocationInformation = false;
+    std::unordered_map<std::string, std::string> mAdditionalFields;
 };
 
 }

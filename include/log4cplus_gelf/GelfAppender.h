@@ -2,11 +2,15 @@
 #define LOG4CPLUS_GELF_GELFAPPENDER_H
 
 #include <log4cplus/appender.h>
+#include <log4cplus/syslogappender.h>
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
 namespace log4cplus {
+
+class AbstractTransport;
 
 class GelfAppender : public Appender {
 public:
@@ -29,6 +33,9 @@ protected:
     void sendGelfPayload(const std::string& payload);
 
 private:
+    std::unique_ptr<AbstractTransport> mTransport;
+
+    std::string mTransportKind;
     std::string mServerHost;
     unsigned int mServerPort;
     std::string mHost;
@@ -36,6 +43,22 @@ private:
 
     bool mIncludeLocationInformation = false;
     std::unordered_map<std::string, std::string> mAdditionalFields;
+
+    /**
+     * Dummy class to give public access to the getSysLogLevel() method
+     */
+    class SysLogLevel : public log4cplus::SysLogAppender {
+    public:
+        SysLogLevel() : log4cplus::SysLogAppender("SysLogLevel") {}
+        /**
+         * We want to make getSysLogLevel() public.
+         */
+        using log4cplus::SysLogAppender::getSysLogLevel;
+    };
+    /**
+     * Dummy constant to give static access to getSysLogLevel() method
+     */
+    const SysLogLevel SYSLOG_LEVEL;
 };
 
 }

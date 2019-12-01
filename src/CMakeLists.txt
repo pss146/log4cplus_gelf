@@ -1,13 +1,16 @@
-set(HEADERS
+set(PRIVATE_HEADERS
+        include/AbstractTransport.h
+        include/UdpTransport.h
+        include/TransportFactory.h
         )
 
 set(SOURCES
-        library.cpp
         GelfAppender.cpp
+        UdpTransport.cpp
         )
 
-foreach(SRC ${HEADERS})
-    list(APPEND SOURCES "${HEADERS_DIR}/${SRC}")
+foreach(SRC ${PRIVATE_HEADERS})
+    list(APPEND SOURCES ${SRC})
 endforeach()
 
 

@@ -13,10 +13,22 @@
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
-static const std::string fieldNameValidationExp = "^[\\w\\.\\-]*$";
-static const std::vector<std::string> deprecatedFieldNames = {"_id"};
-
 namespace log4cplus {
+
+    /*
+    * SYSLOG priorities
+    */
+    #define	LOG_EMERG	0	/* system is unusable */
+    #define	LOG_ALERT	1	/* action must be taken immediately */
+    #define	LOG_CRIT	2	/* critical conditions */
+    #define	LOG_ERR		3	/* error conditions */
+    #define	LOG_WARNING	4	/* warning conditions */
+    #define	LOG_NOTICE	5	/* normal but significant condition */
+    #define	LOG_INFO	6	/* informational */
+    #define	LOG_DEBUG	7	/* debug-level messages */
+
+    static const std::string fieldNameValidationExp = "^[\\w\\.\\-]*$";
+    static const std::vector<std::string> deprecatedFieldNames = {"_id"};
 
     GelfAppender::GelfAppender() {
 
@@ -75,12 +87,23 @@ namespace log4cplus {
         sendGelfPayload(gelfJson);
     }
 
-    const std::string &GelfAppender::facility() const {
-        return mFacility;
-    }
-
-    void GelfAppender::setFacility(const std::string &facility) {
-        GelfAppender::mFacility = facility;
+    int GelfAppender::getSysLogLevel(const LogLevel& ll) const {
+        if(ll < INFO_LOG_LEVEL /* || ll < DEBUG_LOG_LEVEL*/) {
+            return LOG_DEBUG;
+        }
+        else if(ll < WARN_LOG_LEVEL) {
+            return LOG_INFO;
+        }
+        else if(ll < ERROR_LOG_LEVEL) {
+            return LOG_WARNING;
+        }
+        else if(ll < FATAL_LOG_LEVEL) {
+            return LOG_ERR;
+        }
+        else if(ll == FATAL_LOG_LEVEL) {
+            return LOG_CRIT;
+        }
+        return LOG_ALERT;  // ll > FATAL_LOG_LEVEL
     }
 
     std::string GelfAppender::createGelfJsonFromEvent(const log4cplus::spi::InternalLoggingEvent &event) {
@@ -97,7 +120,7 @@ namespace log4cplus {
         double timestamp = sec + (usec / 1000000.0);
         gelfMessage.SetTimestamp(timestamp);
 
-        int level = SYSLOG_LEVEL.getSysLogLevel(event.getLogLevel());
+        int level = getSysLogLevel(event.getLogLevel());
         gelfMessage.SetField("level", level);
 
         gelfMessage.SetField("facility", mFacility);
@@ -105,8 +128,8 @@ namespace log4cplus {
         gelfMessage.SetField("line", event.getLine());
 
         // Insert additional fields
-        for (const auto&[key, value]: mAdditionalFields) {
-            gelfMessage.SetField(key, value);
+        for (const auto& kv: mAdditionalFields) {
+            gelfMessage.SetField(kv.first, kv.second);
         }
 
         // Serialize GELF message

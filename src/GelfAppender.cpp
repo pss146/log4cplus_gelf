@@ -84,7 +84,7 @@ namespace log4cplus {
         auto gelfJson = createGelfJsonFromEvent(event);
 
         // Send GELF payload via UDP socket
-        sendGelfPayload(gelfJson);
+        sendGelfPayload(std::move(gelfJson));
     }
 
     int GelfAppender::getSysLogLevel(const LogLevel& ll) const {
@@ -140,10 +140,8 @@ namespace log4cplus {
         return oss.str();
     }
 
-    void GelfAppender::sendGelfPayload(const std::string &payload) {
-        helpers::getLogLog().debug(
-                LOG4CPLUS_STRING_TO_TSTRING("Payload: " + payload));
-        mTransport->send(payload);
+    void GelfAppender::sendGelfPayload(std::string payload) {
+        mTransport->send(std::move(payload));
     }
 
 }

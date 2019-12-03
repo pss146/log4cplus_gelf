@@ -16,15 +16,10 @@ public:
 
     ~UdpTransport() override;
 
-    void send(const std::string &payload) override;
+    void send(std::string payload) override;
 
 protected:
     void initSocket();
-
-    /**
-     * Dummy handler for the Boost async_send_to()
-     */
-    void handler() {}
 
 private:
     /// The io_context used to perform asynchronous operations.

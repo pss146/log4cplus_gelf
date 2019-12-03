@@ -10,7 +10,7 @@ class AbstractTransport {
 public:
     virtual ~AbstractTransport() = default;
 
-    virtual void send(const std::string& payload) = 0;
+    virtual void send(std::string payload) = 0;
 };
 
 }

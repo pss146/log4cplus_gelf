@@ -25,11 +25,15 @@ UdpTransport::~UdpTransport() {
     mServiceThread.reset();
 }
 
-void UdpTransport::send(const std::string &payload) {
+void UdpTransport::send(std::string payload) {
     if (!mInitialized) return;
-
+    // Make sure data survive until end of async operation
+    auto data = std::make_shared<std::string>(std::move(payload));
     // Send the message to the UDP endpoint
-    mSocket->async_send_to(boost::asio::buffer(payload), mRemoteEndpoint, boost::bind(&UdpTransport::handler, this));
+    mSocket->async_send_to(boost::asio::buffer(*data), mRemoteEndpoint,
+                           [data](const boost::system::error_code &error, std::size_t bytes_transferred) {
+                                // do nothing
+                           });
 }
 
 void UdpTransport::initSocket() {

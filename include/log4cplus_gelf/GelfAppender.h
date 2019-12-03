@@ -25,7 +25,7 @@ protected:
     void append(const log4cplus::spi::InternalLoggingEvent &event) override;
 
     std::string createGelfJsonFromEvent(const log4cplus::spi::InternalLoggingEvent &event);
-    void sendGelfPayload(const std::string& payload);
+    void sendGelfPayload(std::string payload);
 
     int getSysLogLevel(const LogLevel& ll) const;
 
